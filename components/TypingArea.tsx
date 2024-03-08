@@ -14,6 +14,7 @@ const TypingArea = ({ exampleValue }: TypingAreaProp) => {
   const [exampleCharList, setExampleCharList] = useState<string[]>([])
   const [typingCount, setTypingCount] = useState<number>(0)
   const [inputString, setInputString] = useState<string>("")
+  const [submitCount, setSubmitCount] = useState<number>(0)
 
   const koreanLayout = {
     default: [
@@ -63,13 +64,16 @@ const TypingArea = ({ exampleValue }: TypingAreaProp) => {
 
   return (
     <div className={styles.wrap}>
-      <p className={styles.exampleValue}>{exampleValue}</p>
+      <p
+        className={styles.exampleValue}
+      >{`${exampleValue}${submitCount > 0 ? `- ${submitCount}번` : ""}`}</p>
       <div className={styles.box}>
         <form
           onSubmit={(e) => {
             e.preventDefault()
 
             if (exampleCharList.length === typingCount) {
+              setSubmitCount((prevSubmitCount) => prevSubmitCount + 1)
               setTypingCount(0)
               setInputString("")
             }
