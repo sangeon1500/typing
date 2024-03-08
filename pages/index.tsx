@@ -21,7 +21,11 @@ const Home: NextPage = () => {
         <h1>한글 타이핑</h1>
         <div className={styles.typingBox}>
           <TypingExample changeState={setExampleValue} />
-          <TypingArea exampleValue={exampleValue} />
+          {exampleValue ? (
+            <TypingArea exampleValue={exampleValue} />
+          ) : (
+            <p>예시용 단어를 선택하세요.</p>
+          )}
         </div>
       </main>
 

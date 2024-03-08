@@ -1,7 +1,6 @@
-// import Typing, { TypingMultiline } from "react-kr-typing-anim"
 import * as Hangul from "hangul-js"
 import styles from "../styles/components/TypingArea.module.scss"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import KeyboardReact, { KeyboardReactInterface } from "react-simple-keyboard"
 
 interface TypingAreaProp {
@@ -12,6 +11,7 @@ const TypingArea = ({ exampleValue }: TypingAreaProp) => {
   const keyboardRef = useRef<KeyboardReactInterface>(null)
   const [layoutName, setLayoutName] = useState("default")
   const [text, setText] = useState<string>("")
+  const [exampleCharList, setExampleCharList] = useState<string[]>([])
 
   const koreanLayout = {
     default: [
@@ -52,6 +52,12 @@ const TypingArea = ({ exampleValue }: TypingAreaProp) => {
       keyboardRef?.current?.setInput(key)
     }
   }
+
+  useEffect(() => {
+    setExampleCharList(Hangul.disassemble(exampleValue))
+  }, [exampleValue])
+
+  console.log(exampleCharList)
 
   return (
     <div className={styles.wrap}>
