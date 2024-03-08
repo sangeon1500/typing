@@ -4,7 +4,11 @@ import styles from "../styles/components/TypingArea.module.scss"
 import { useRef, useState } from "react"
 import KeyboardReact, { KeyboardReactInterface } from "react-simple-keyboard"
 
-const TypingArea = () => {
+interface TypingAreaProp {
+  exampleValue: string
+}
+
+const TypingArea = ({ exampleValue }: TypingAreaProp) => {
   const keyboardRef = useRef<KeyboardReactInterface>(null)
   const [layoutName, setLayoutName] = useState("default")
   const [text, setText] = useState<string>("")
@@ -51,6 +55,7 @@ const TypingArea = () => {
 
   return (
     <div className={styles.wrap}>
+      <p>{exampleValue}</p>
       <div className={styles.box}>
         <input
           className={styles.input}
