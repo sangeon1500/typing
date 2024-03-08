@@ -3,6 +3,7 @@ import Head from "next/head"
 import Image from "next/image"
 import styles from "../styles/Home.module.css"
 import dynamic from "next/dynamic"
+import TypingExample from "../components/TypingExample"
 
 const Home: NextPage = () => {
   const DynamicTypingArea = dynamic(() => import("../components/TypingArea"), {
@@ -19,7 +20,10 @@ const Home: NextPage = () => {
 
       <main className={styles.main}>
         <h1>타이핑 애니메이션</h1>
-        <DynamicTypingArea />
+        <div>
+          <TypingExample changeState={() => {}}/>
+          <DynamicTypingArea />
+        </div>
       </main>
 
       <footer className={styles.footer}>

@@ -1,13 +1,13 @@
 // import Typing, { TypingMultiline } from "react-kr-typing-anim"
 import * as Hangul from "hangul-js"
 import styles from "../styles/components/TypingArea.module.scss"
-import { useState } from "react"
-import KeyboardReact from "react-simple-keyboard"
+import { useRef, useState } from "react"
+import KeyboardReact, { KeyboardReactInterface } from "react-simple-keyboard"
 
 const TypingArea = () => {
+  const keyboardRef = useRef<KeyboardReactInterface>(null)
   const [layoutName, setLayoutName] = useState("default")
-
-  const [text, setText] = useState<string>("아이엠랩")
+  const [text, setText] = useState<string>("")
 
   const koreanLayout = {
     default: [
@@ -41,20 +41,34 @@ const TypingArea = () => {
     }
   }
 
+  const onChangeInput = (key: string) => {
+    setText(key)
+
+    if (keyboardRef?.current) {
+      keyboardRef?.current?.setInput(key)
+    }
+  }
+
   return (
     <div className={styles.wrap}>
       <div className={styles.box}>
         <input
           className={styles.input}
           onChange={(e) => {
-            setText(e.target.value)
+            onChangeInput(e.target.value)
           }}
         />
         <p className={styles.exampleText}>{text}</p>
       </div>
       <KeyboardReact
+        keyboardRef={(ref) => {
+          keyboardRef.current = ref
+        }}
         layoutName={layoutName}
         layout={{ ...koreanLayout }}
+        onChange={(key) => {
+          setText(key)
+        }}
         onKeyPress={onKeyPress}
         display={{
           "{enterText}": "Enter",
