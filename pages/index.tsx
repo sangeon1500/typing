@@ -2,13 +2,12 @@ import type { NextPage } from "next"
 import Head from "next/head"
 import Image from "next/image"
 import styles from "../styles/Home.module.css"
-import dynamic from "next/dynamic"
 import TypingExample from "../components/TypingExample"
+import { useState } from "react"
+import TypingArea from "../components/TypingArea"
 
 const Home: NextPage = () => {
-  const DynamicTypingArea = dynamic(() => import("../components/TypingArea"), {
-    ssr: false,
-  })
+  const [exampleValue, setExampleValue] = useState<string>("")
 
   return (
     <div className={styles.container}>
@@ -20,9 +19,9 @@ const Home: NextPage = () => {
 
       <main className={styles.main}>
         <h1>타이핑 애니메이션</h1>
-        <div>
-          <TypingExample changeState={() => {}}/>
-          <DynamicTypingArea />
+        <div className={styles.typingBox}>
+          <TypingExample changeState={setExampleValue} />
+          <TypingArea exampleValue={exampleValue} />
         </div>
       </main>
 
