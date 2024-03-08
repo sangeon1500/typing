@@ -12,6 +12,8 @@ const TypingArea = ({ exampleValue }: TypingAreaProp) => {
   const [layoutName, setLayoutName] = useState("default")
   const [text, setText] = useState<string>("")
   const [exampleCharList, setExampleCharList] = useState<string[]>([])
+  const [typingCount, setTypingCount] = useState<number>(0)
+  const [inputString, setInputString] = useState<string>("")
 
   const koreanLayout = {
     default: [
@@ -57,21 +59,29 @@ const TypingArea = ({ exampleValue }: TypingAreaProp) => {
     setExampleCharList(Hangul.disassemble(exampleValue))
   }, [exampleValue])
 
-  console.log(exampleCharList)
-
   return (
     <div className={styles.wrap}>
       <p className={styles.exampleValue}>{exampleValue}</p>
       <div className={styles.box}>
         <input
           className={styles.input}
-          onChange={(e) => {
-            onChangeInput(e.target.value)
+          value={inputString}
+          onKeyUp={({ key }) => {
+        
+            if (exampleCharList[typingCount] === key) {
+              setTypingCount((prevCount) => prevCount + 1)
+
+              setInputString(
+                Hangul.assemble(
+                  exampleCharList.filter((_, index) => index <= typingCount),
+                ),
+              )
+            }
           }}
         />
         <p className={styles.exampleText}>{text}</p>
       </div>
-      <KeyboardReact
+      {/* <KeyboardReact
         keyboardRef={(ref) => {
           keyboardRef.current = ref
         }}
@@ -90,7 +100,7 @@ const TypingArea = ({ exampleValue }: TypingAreaProp) => {
           "{pre}": "←",
         }}
         text
-      />
+      /> */}
     </div>
   )
 }
