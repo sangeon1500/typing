@@ -7,6 +7,8 @@
   border: 1px solid #cccccc;
   width: 50vw;
   height: 50px;
+  padding: 20px;
+  border-radius: 10px;
 }
 
 .exampleValue {
@@ -17,10 +19,17 @@
 }
 
 .exampleText {
-  margin: 0;
+  margin: 20px 0 0 0;
   font-size: 40px;
   color: #cccccc;
   opacity: 0.5;
+
+  span {
+    &:last-of-type {
+      color: #1646b5;
+      opacity: 1;
+    }
+  }
 }
 
 .typingText {

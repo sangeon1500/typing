@@ -67,7 +67,6 @@ const TypingArea = ({ exampleValue }: TypingAreaProp) => {
           className={styles.input}
           value={inputString}
           onKeyUp={({ key }) => {
-        
             if (exampleCharList[typingCount] === key) {
               setTypingCount((prevCount) => prevCount + 1)
 
@@ -79,7 +78,11 @@ const TypingArea = ({ exampleValue }: TypingAreaProp) => {
             }
           }}
         />
-        <p className={styles.exampleText}>{text}</p>
+        <p className={styles.exampleText}>
+          {inputString.split("").map((string, index) => (
+            <span key={string + index}>{string}</span>
+          ))}
+        </p>
       </div>
       {/* <KeyboardReact
         keyboardRef={(ref) => {
