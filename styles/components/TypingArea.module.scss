@@ -1,0 +1,31 @@
+.box {
+  position: relative;
+  margin: 0 0 40px 0;
+}
+
+.input {
+  color: #ffffff;
+  border: 1px solid #cccccc;
+  width: 50vw;
+  height: 50px;
+}
+
+.exampleText {
+  margin: 0;
+  font-size: 40px;
+  color: #cccccc;
+  opacity: 0.5;
+}
+
+.typingText {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 40px;
+  margin: 0;
+}
+
+.highLight {
+  color: red;
+}
