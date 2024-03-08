@@ -55,7 +55,7 @@ const TypingArea = ({ exampleValue }: TypingAreaProp) => {
 
   return (
     <div className={styles.wrap}>
-      <p>{exampleValue}</p>
+      <p className={styles.exampleValue}>{exampleValue}</p>
       <div className={styles.box}>
         <input
           className={styles.input}

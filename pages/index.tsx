@@ -18,7 +18,7 @@ const Home: NextPage = () => {
       </Head>
 
       <main className={styles.main}>
-        <h1>타이핑 애니메이션</h1>
+        <h1>한글 타이핑</h1>
         <div className={styles.typingBox}>
           <TypingExample changeState={setExampleValue} />
           <TypingArea exampleValue={exampleValue} />
