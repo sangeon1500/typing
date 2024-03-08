@@ -57,27 +57,40 @@ const TypingArea = ({ exampleValue }: TypingAreaProp) => {
 
   useEffect(() => {
     setExampleCharList(Hangul.disassemble(exampleValue))
+    setTypingCount(0)
+    setInputString("")
   }, [exampleValue])
 
   return (
     <div className={styles.wrap}>
       <p className={styles.exampleValue}>{exampleValue}</p>
       <div className={styles.box}>
-        <input
-          className={styles.input}
-          value={inputString}
-          onKeyUp={({ key }) => {
-            if (exampleCharList[typingCount] === key) {
-              setTypingCount((prevCount) => prevCount + 1)
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
 
-              setInputString(
-                Hangul.assemble(
-                  exampleCharList.filter((_, index) => index <= typingCount),
-                ),
-              )
+            if (exampleCharList.length === typingCount) {
+              setTypingCount(0)
+              setInputString("")
             }
           }}
-        />
+        >
+          <input
+            className={styles.input}
+            value={inputString}
+            onKeyUp={({ key }) => {
+              if (exampleCharList[typingCount] === key) {
+                setTypingCount((prevCount) => prevCount + 1)
+
+                setInputString(
+                  Hangul.assemble(
+                    exampleCharList.filter((_, index) => index <= typingCount),
+                  ),
+                )
+              }
+            }}
+          />
+        </form>
         <p className={styles.exampleText}>
           {inputString.split("").map((string, index) => (
             <span key={string + index}>{string}</span>
