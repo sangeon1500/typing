@@ -20,7 +20,10 @@ const Home: NextPage = () => {
       <main className={styles.main}>
         <h1>한글 타이핑</h1>
         <div className={styles.typingBox}>
-          <TypingExample changeState={setExampleValue} />
+          <TypingExample
+            exampleValue={exampleValue}
+            changeState={setExampleValue}
+          />
           {exampleValue ? (
             <TypingArea exampleValue={exampleValue} />
           ) : (

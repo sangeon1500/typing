@@ -11,12 +11,14 @@
   "dependencies": {
     "hangul-js": "^0.2.6",
     "next": "12.2.0",
+    "next-transpile-modules": "^10.0.1",
     "prettier": "^3.2.5",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-kr-typing-anim": "^0.1.0",
     "react-simple-keyboard": "^3.7.94",
     "sass": "^1.71.1",
+    "simple-keyboard-layouts": "^3.3.83",
     "type-hangul": "^0.2.4"
   },
   "devDependencies": {

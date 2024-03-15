@@ -2,34 +2,21 @@ import * as Hangul from "hangul-js"
 import styles from "../styles/components/TypingArea.module.scss"
 import { useEffect, useRef, useState } from "react"
 import KeyboardReact, { KeyboardReactInterface } from "react-simple-keyboard"
+import korean from "simple-keyboard-layouts/build/layouts/korean"
+import "react-simple-keyboard/build/css/index.css"
 
 interface TypingAreaProp {
   exampleValue: string
 }
 
 const TypingArea = ({ exampleValue }: TypingAreaProp) => {
-  const keyboardRef = useRef<KeyboardReactInterface>(null)
+  const keyboardRef = useRef<KeyboardReactInterface | null>(null)
   const [layoutName, setLayoutName] = useState("default")
   const [text, setText] = useState<string>("")
   const [exampleCharList, setExampleCharList] = useState<string[]>([])
   const [typingCount, setTypingCount] = useState<number>(0)
   const [inputString, setInputString] = useState<string>("")
   const [submitCount, setSubmitCount] = useState<number>(0)
-
-  const koreanLayout = {
-    default: [
-      "ㅂ ㅈ ㄷ ㄱ ㅅ ㅛ ㅕ ㅑ ㅐ ㅔ",
-      "ㅁ ㄴ ㅇ ㄹ ㅎ ㅗ ㅓ ㅏ ㅣ",
-      "{shift} ㅋ ㅌ ㅊ ㅍ ㅠ ㅜ ㅡ {pre}",
-      "{space} {dot} {enterText}",
-    ],
-    shift: [
-      "ㅃ ㅉ ㄸ ㄲ ㅆ ㅛ ㅕ ㅑ ㅒ ㅖ",
-      "ㅁ ㄴ ㅇ ㄹ ㅎ ㅗ ㅓ ㅏ ㅣ",
-      "{shift} ㅋ ㅌ ㅊ ㅍ ㅠ ㅜ ㅡ {pre}",
-      "{space} {dot} {enterText}",
-    ],
-  }
 
   const onKeyPress = (key: string) => {
     if (key === "{pre}") {
@@ -45,14 +32,6 @@ const TypingArea = ({ exampleValue }: TypingAreaProp) => {
       setText((prev) => prev + " ")
     } else {
       setText((prev) => Hangul.assemble(Hangul.disassemble(prev + key)))
-    }
-  }
-
-  const onChangeInput = (key: string) => {
-    setText(key)
-
-    if (keyboardRef?.current) {
-      keyboardRef?.current?.setInput(key)
     }
   }
 
@@ -82,16 +61,28 @@ const TypingArea = ({ exampleValue }: TypingAreaProp) => {
           <input
             className={styles.input}
             value={inputString}
+            onChange={(e) => {
+              setInputString(e.target.value)
+            }}
             onKeyUp={({ key }) => {
-              if (exampleCharList[typingCount] === key) {
-                setTypingCount((prevCount) => prevCount + 1)
-
-                setInputString(
-                  Hangul.assemble(
-                    exampleCharList.filter((_, index) => index <= typingCount),
-                  ),
+              if (key === "Shift") {
+                setLayoutName((prev) =>
+                  prev === "default" ? "shift" : "default",
                 )
               }
+
+              // if (exampleCharList[typingCount] === key) {
+              // setInputString(e.target.value)
+
+              // setInputString(
+              //   Hangul.assemble(
+              //     exampleCharList.filter((_, index) => index <= typingCount),
+              //   ),
+              // )
+              // }
+
+              keyboardRef.current?.setInput(key)
+              setTypingCount((prevCount) => prevCount + 1)
             }}
           />
         </form>
@@ -101,26 +92,47 @@ const TypingArea = ({ exampleValue }: TypingAreaProp) => {
           ))}
         </p>
       </div>
-      {/* <KeyboardReact
+      <KeyboardReact
         keyboardRef={(ref) => {
           keyboardRef.current = ref
         }}
         layoutName={layoutName}
-        layout={{ ...koreanLayout }}
         onChange={(key) => {
           setText(key)
         }}
-        onKeyPress={onKeyPress}
+        onKeyPress={(button) => {
+          console.log("onKeyPress", button)
+        }}
         display={{
-          "{enterText}": "Enter",
+          "{enter}": "Enter",
           "{shift}": "↑",
           "{.}": ".",
           "{space}": " ",
           "{dot}": ".",
-          "{pre}": "←",
+          "{bksp}": "←",
+          "{tab}": "Tab",
+          "{lock}": "CapsLock",
         }}
-        text
-      /> */}
+        {...korean}
+        layout={{
+          default: [
+            "1 2 3 4 5 6 7 8 9 0 - = {bksp}",
+            "{tab} ㅂ ㅈ ㄷ ㄱ ㅅ ㅛ ㅕ ㅑ ㅐ ㅔ [ ] \\",
+            "{lock} ㅁ ㄴ ㅇ ㄹ ㅎ ㅗ ㅓ ㅏ ㅣ ; ' {enter}",
+            "{shift} ㅋ ㅌ ㅊ ㅍ ㅠ ㅜ ㅡ , . / {shift}",
+            ".com @ {space}",
+          ],
+          shift: [
+            "1 2 3 4 5 6 7 8 9 0 - = {bksp}",
+            "{tab} ㅃ ㅉ ㄸ ㄲ ㅆ ㅛ ㅕ ㅑ ㅒ ㅖ",
+            "{lock} ㅁ ㄴ ㅇ ㄹ ㅎ ㅗ ㅓ ㅏ ㅣ : {enter}",
+            "{shift} ㅋ ㅌ ㅊ ㅍ ㅠ ㅜ ㅡ , . / {shift}",
+            ".com @ {space}",
+          ],
+        }}
+        physicalKeyboardHighlight={true}
+        syncInstanceInputs={true}
+      />
     </div>
   )
 }
