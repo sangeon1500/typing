@@ -50,13 +50,8 @@
 }
 
 .typingText {
-  position: absolute;
-  left: 0px;
-  top: 50%;
-  transform: translateY(-50%);
   font-size: 40px;
   margin: 0;
-  z-index: 10;
   & span:last-of-type {
     color: #e64234;
   }

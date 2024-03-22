@@ -7,18 +7,14 @@ import KeyboardReact, {
 } from "react-simple-keyboard"
 import "react-simple-keyboard/build/css/index.css"
 import { typingMap } from "../utils/typing"
+import TypingModal from "./TypingModal"
 
 interface TypingAreaProp {
   exampleValue: string
   setTotalCount: Dispatch<SetStateAction<number>>
-  setShowModal: (modal: boolean) => void
 }
 
-const TypingArea = ({
-  exampleValue,
-  setTotalCount,
-  setShowModal,
-}: TypingAreaProp) => {
+const TypingArea = ({ exampleValue, setTotalCount }: TypingAreaProp) => {
   const keyboardRef = useRef<KeyboardReactInterface | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
   const buttonRef = useRef<KeyboardElement | null>(null)
@@ -29,9 +25,16 @@ const TypingArea = ({
   const [text, setText] = useState<string>("")
   const [exampleList, setExampleList] = useState<string[]>([])
   const [inputString, setInputString] = useState<string>("")
-  const [wrongNumber, setWrongNumer] = useState<number>(0)
+  const [validNumber, setValidNumer] = useState<number>(0)
+  const [totalNumber, setTotalNumer] = useState<number>(0)
   const [inputStringList, setInputStringList] = useState<string[]>([])
   const [submitCount, setSubmitCount] = useState<number>(0)
+  const [showModal, setShowModal] = useState<boolean>(false)
+  const totalPressNumber = useRef<number>(0)
+  const backSpacePressNumber = useRef<number>(0)
+  const [minutes, setMinutes] = useState(0)
+  const [seconds, setSeconds] = useState(0)
+  const [time, setTime] = useState<number>(0)
 
   const onKeyPress = (key: string) => {
     if (key === "{pre}") {
@@ -58,6 +61,8 @@ const TypingArea = ({
     setCurrentIndex(currentIndex + 1)
   }
 
+  const formatTime = (time: number) => (time < 10 ? `0${time}` : time)
+
   useEffect(() => {
     inputRef.current?.focus()
   }, [exampleValue])
@@ -65,41 +70,33 @@ const TypingArea = ({
   useEffect(() => {
     if (!exampleList?.length) return
 
-    console.log(currentIndex);
-    
-
-    if (currentIndex === exampleList.length - 1) {
-      console.log(exampleList)
-
-      console.log(inputStringList)
-
+    if (inputStringList.length === exampleList.length) {
       setShowModal(true)
       setInputString("")
 
-      let tempWrongNumber = 0
+      let tempTotalNumber = 0
+      let tempValidNumber = 0
 
       exampleList.forEach((exampleText, index) => {
         const exampleCharList = exampleText?.split("")
         const inputCharList = inputStringList[index]?.split("")
 
-        console.log(inputStringList[index])
-
         const checkList = exampleCharList.filter(
           (char, charIndex) => char === inputCharList[charIndex],
         )
 
-        tempWrongNumber += checkList.length
+        tempTotalNumber += exampleCharList.length
+        tempValidNumber += checkList.length
       })
 
-      setWrongNumer(tempWrongNumber)
-
-      console.log(tempWrongNumber)
+      setTotalNumer(tempTotalNumber)
+      setValidNumer(tempValidNumber)
 
       return
     }
 
     setCurrentExampleString(exampleList[currentIndex])
-  }, [currentIndex, exampleList])
+  }, [currentIndex, inputStringList, exampleList])
 
   useEffect(() => {
     setInputString("")
@@ -131,6 +128,25 @@ const TypingArea = ({
     }
   }, [inputString, currentIndex])
 
+  useEffect(() => {
+    if (!exampleValue) return
+
+    const interval = setInterval(() => {
+      setTime((prev) => prev + 1)
+      setSeconds((prevSeconds) => {
+        if (prevSeconds === 59) {
+          setMinutes((prevMinutes) => prevMinutes + 1)
+          return 0
+        }
+        return prevSeconds + 1
+      })
+    }, 1000)
+
+    return () => {
+      clearInterval(interval)
+    }
+  }, [exampleValue])
+
   return (
     <div className={styles.wrap}>
       <div className={styles.exampleWrap}>
@@ -153,7 +169,9 @@ const TypingArea = ({
         </ul>
       </div>
       <p className={styles.exampleValue}>
-        {exampleValue || "좌측의 타이핑 연습 주제를 선택해주세요."}
+        {exampleValue
+          ? `${exampleValue} - 걸린 시간 : ${formatTime(minutes)}:${formatTime(seconds)}`
+          : "좌측의 타이핑 연습 주제를 선택해주세요."}
       </p>
       <div className={styles.box}>
         <form
@@ -191,16 +209,22 @@ const TypingArea = ({
               }
 
               keyboardRef.current?.setInput(key)
+
+              if (key === "Backspace") {
+                backSpacePressNumber.current += 1
+              }
+
+              totalPressNumber.current += 1
             }}
           />
         </form>
         <div style={{ position: "relative", margin: "10px 0" }}>
+          <p className={styles.exampleText}>{exampleList[currentIndex]}</p>
           <p className={styles.typingText}>
             {inputString.split("").map((string, index) => (
               <span key={string + index}>{string}</span>
             ))}
           </p>
-          <p className={styles.exampleText}>{exampleList[currentIndex]}</p>
         </div>
       </div>
       <KeyboardReact
@@ -240,6 +264,16 @@ const TypingArea = ({
         physicalKeyboardHighlight={true}
         syncInstanceInputs={true}
       />
+
+      {showModal ? (
+        <TypingModal
+          totalNumber={totalNumber}
+          validNumber={validNumber}
+          totalPressNumber={totalPressNumber.current}
+          backSpacePressNumber={backSpacePressNumber.current}
+          progressTime={time}
+        />
+      ) : null}
     </div>
   )
 }
