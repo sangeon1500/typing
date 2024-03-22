@@ -1,33 +1,35 @@
+import styles from "../styles/components/TypingArea.module.scss"
 interface TypingExampleProp {
-  exampleValue: string
   changeState: (newTarget: string) => void
+  totalCount: number
 }
 
-const TypingExample = ({ exampleValue, changeState }: TypingExampleProp) => {
+const TypingExample = ({ changeState, totalCount }: TypingExampleProp) => {
   const exampleList = ["안녕하세요", "펴나니", "가좌동", "실버타운", "요양원"]
-
   return (
     <div>
-      <p>타이핑연습</p>
+      <div>타이핑연습</div>
       <div>
-        <img/>
-        <p></p>
+        <img src="/images/user.png" width="150"></img>
+        <p>{`총 성공횟수 : ${totalCount}회`}</p>
       </div>
-
-      {exampleList.map((example) => (
-        <p
-          key={example}
-          style={{
-            color: exampleValue === example ? "#1646b5" : "#333333",
-            cursor: "pointer",
-          }}
-          onClick={() => {
-            changeState(example)
-          }}
-        >
-          {example}
-        </p>
-      ))}
+      <div className={styles.box}>
+        <ul className={styles.buttonUl}>
+          {exampleList.map((example) => (
+            <li key={example} style={{ listStyle: "none" }}>
+              <button
+                className={styles.typeButton}
+                key={example}
+                onClick={() => {
+                  changeState(example)
+                }}
+              >
+                {example}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   )
 }

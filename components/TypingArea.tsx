@@ -1,20 +1,24 @@
 import * as Hangul from "hangul-js"
 import styles from "../styles/components/TypingArea.module.scss"
-import { useEffect, useRef, useState } from "react"
-import KeyboardReact, { KeyboardReactInterface } from "react-simple-keyboard"
-import korean from "simple-keyboard-layouts/build/layouts/korean"
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react"
+import KeyboardReact, {
+  KeyboardElement,
+  KeyboardReactInterface,
+} from "react-simple-keyboard"
 import "react-simple-keyboard/build/css/index.css"
 
 interface TypingAreaProp {
   exampleValue: string
+  setTotalCount: Dispatch<SetStateAction<number>>
 }
 
-const TypingArea = ({ exampleValue }: TypingAreaProp) => {
+const TypingArea = ({ exampleValue, setTotalCount }: TypingAreaProp) => {
   const keyboardRef = useRef<KeyboardReactInterface | null>(null)
+  const inputRef = useRef<HTMLInputElement | null>(null)
+  const isSubmitRef = useRef<boolean>(false)
+  const buttonRef = useRef<KeyboardElement | null>(null)
   const [layoutName, setLayoutName] = useState("default")
   const [text, setText] = useState<string>("")
-  const [exampleCharList, setExampleCharList] = useState<string[]>([])
-  const [typingCount, setTypingCount] = useState<number>(0)
   const [inputString, setInputString] = useState<string>("")
   const [submitCount, setSubmitCount] = useState<number>(0)
 
@@ -35,73 +39,95 @@ const TypingArea = ({ exampleValue }: TypingAreaProp) => {
     }
   }
 
-  useEffect(() => {
-    setExampleCharList(Hangul.disassemble(exampleValue))
-    setTypingCount(0)
+  const handleComplete = () => {
+    setSubmitCount(submitCount + 1)
+    setTotalCount((totalCount: number) => totalCount + 1)
     setInputString("")
+    isSubmitRef.current = true
+  }
+
+  useEffect(() => {
+    inputRef.current?.focus()
+  }, [])
+
+  useEffect(() => {
+    setInputString("")
+    setSubmitCount(0)
+    isSubmitRef.current = false
   }, [exampleValue])
+
+  useEffect(() => {
+    const exampleDiassemble = Hangul.disassemble(exampleValue)
+    const inputeDiassemble = Hangul.disassemble(inputString)
+    const nextChar = exampleDiassemble[inputeDiassemble?.length || 0]
+
+    if (buttonRef.current) {
+      buttonRef.current.style.backgroundColor = "#FFFFFF"
+      buttonRef.current.style.color = "#333333"
+    }
+
+    buttonRef.current =
+      keyboardRef.current?.buttonElements[nextChar]?.[0] || null
+
+    if (buttonRef.current) {
+      buttonRef.current.style.backgroundColor = "#ff845c"
+      buttonRef.current.style.color = "#E64234"
+    }
+  }, [inputString])
 
   return (
     <div className={styles.wrap}>
-      <p
-        className={styles.exampleValue}
-      >{`${exampleValue}${submitCount > 0 ? `- ${submitCount}번` : ""}`}</p>
+      <p className={styles.exampleValue}>{exampleValue}</p>
       <div className={styles.box}>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault()
+        <input
+          className={styles.input}
+          value={inputString}
+          ref={inputRef}
+          onChange={(e) => {
+            if (isSubmitRef.current) return
 
-            if (exampleCharList.length === typingCount) {
-              setSubmitCount((prevSubmitCount) => prevSubmitCount + 1)
-              setTypingCount(0)
-              setInputString("")
+            const newValue = e.target.value
+            setInputString(newValue)
+
+            if (newValue?.length > exampleValue.length) {
+              handleComplete()
             }
           }}
-        >
-          <input
-            className={styles.input}
-            value={inputString}
-            onChange={(e) => {
-              setInputString(e.target.value)
-            }}
-            onKeyUp={({ key }) => {
-              if (key === "Shift") {
-                setLayoutName((prev) =>
-                  prev === "default" ? "shift" : "default",
-                )
-              }
+          onKeyDown={({ key }) => {
+            if (key === "Shift") {
+              setLayoutName((prev) =>
+                prev === "default" ? "shift" : "default",
+              )
+              return
+            }
 
-              // if (exampleCharList[typingCount] === key) {
-              // setInputString(e.target.value)
+            if (
+              key === "Enter" &&
+              inputString?.length === exampleValue.length
+            ) {
+              handleComplete()
+              return
+            }
 
-              // setInputString(
-              //   Hangul.assemble(
-              //     exampleCharList.filter((_, index) => index <= typingCount),
-              //   ),
-              // )
-              // }
-
-              keyboardRef.current?.setInput(key)
-              setTypingCount((prevCount) => prevCount + 1)
-            }}
-          />
-        </form>
-        <p className={styles.exampleText}>
-          {inputString.split("").map((string, index) => (
-            <span key={string + index}>{string}</span>
-          ))}
-        </p>
+            keyboardRef.current?.setInput(key)
+          }}
+        />
+        <div style={{ position: "relative", margin: "10px 0" }}>
+          <p className={styles.typingText}>
+            {inputString.split("").map((string, index) => (
+              <span key={string + index}>{string}</span>
+            ))}
+          </p>
+          <p className={styles.exampleText}>{exampleValue}</p>
+        </div>
       </div>
       <KeyboardReact
         keyboardRef={(ref) => {
           keyboardRef.current = ref
         }}
         layoutName={layoutName}
-        onChange={(key) => {
-          setText(key)
-        }}
         onKeyPress={(button) => {
-          console.log("onKeyPress", button)
+          onKeyPress(button)
         }}
         display={{
           "{enter}": "Enter",
@@ -113,7 +139,6 @@ const TypingArea = ({ exampleValue }: TypingAreaProp) => {
           "{tab}": "Tab",
           "{lock}": "CapsLock",
         }}
-        {...korean}
         layout={{
           default: [
             "1 2 3 4 5 6 7 8 9 0 - = {bksp}",
