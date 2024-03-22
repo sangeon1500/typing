@@ -6,6 +6,7 @@ import KeyboardReact, {
   KeyboardReactInterface,
 } from "react-simple-keyboard"
 import "react-simple-keyboard/build/css/index.css"
+import { typingMap } from "../utils/typing"
 
 interface TypingAreaProp {
   exampleValue: string
@@ -17,8 +18,10 @@ const TypingArea = ({ exampleValue, setTotalCount }: TypingAreaProp) => {
   const inputRef = useRef<HTMLInputElement | null>(null)
   const isSubmitRef = useRef<boolean>(false)
   const buttonRef = useRef<KeyboardElement | null>(null)
+  const [currentIndex, setCurrentIndex] = useState<number>(0)
   const [layoutName, setLayoutName] = useState("default")
   const [text, setText] = useState<string>("")
+  const [exampleList, setExampleList] = useState<string[]>([])
   const [inputString, setInputString] = useState<string>("")
   const [submitCount, setSubmitCount] = useState<number>(0)
 
@@ -41,6 +44,7 @@ const TypingArea = ({ exampleValue, setTotalCount }: TypingAreaProp) => {
 
   const handleComplete = () => {
     setSubmitCount(submitCount + 1)
+    setCurrentIndex(currentIndex + 1)
     setTotalCount((totalCount: number) => totalCount + 1)
     setInputString("")
     isSubmitRef.current = true
@@ -54,29 +58,44 @@ const TypingArea = ({ exampleValue, setTotalCount }: TypingAreaProp) => {
     setInputString("")
     setSubmitCount(0)
     isSubmitRef.current = false
+    setExampleList(typingMap[exampleValue] ?? [])
   }, [exampleValue])
 
   useEffect(() => {
-    const exampleDiassemble = Hangul.disassemble(exampleValue)
-    const inputeDiassemble = Hangul.disassemble(inputString)
-    const nextChar = exampleDiassemble[inputeDiassemble?.length || 0]
-
-    if (buttonRef.current) {
-      buttonRef.current.style.backgroundColor = "#FFFFFF"
-      buttonRef.current.style.color = "#333333"
-    }
-
-    buttonRef.current =
-      keyboardRef.current?.buttonElements[nextChar]?.[0] || null
-
-    if (buttonRef.current) {
-      buttonRef.current.style.backgroundColor = "#ff845c"
-      buttonRef.current.style.color = "#E64234"
-    }
+    // const exampleDiassemble = Hangul.disassemble(exampleValue)
+    // const inputeDiassemble = Hangul.disassemble(inputString)
+    // const nextChar = exampleDiassemble[inputeDiassemble?.length || 0]
+    // if (buttonRef.current) {
+    //   buttonRef.current.style.backgroundColor = "#FFFFFF"
+    //   buttonRef.current.style.color = "#333333"
+    // }
+    // buttonRef.current =
+    //   keyboardRef.current?.buttonElements[nextChar]?.[0] || null
+    // if (buttonRef.current) {
+    //   buttonRef.current.style.backgroundColor = "#ff845c"
+    //   buttonRef.current.style.color = "#E64234"
+    // }
   }, [inputString])
 
   return (
     <div className={styles.wrap}>
+      <ul
+        className={styles.exampleWrap}
+        style={{ transform: `translateY(-${currentIndex * 42}px)` }}
+      >
+        {exampleList?.map((examString, index) => (
+          <li
+            key={examString + index}
+            className={
+              currentIndex === index
+                ? styles.exampleItemActive
+                : styles.exampleItem
+            }
+          >
+            {examString}
+          </li>
+        ))}
+      </ul>
       <p className={styles.exampleValue}>{exampleValue}</p>
       <div className={styles.box}>
         <input
@@ -89,7 +108,7 @@ const TypingArea = ({ exampleValue, setTotalCount }: TypingAreaProp) => {
             const newValue = e.target.value
             setInputString(newValue)
 
-            if (newValue?.length > exampleValue.length) {
+            if (newValue?.length > exampleList[currentIndex]?.length) {
               handleComplete()
             }
           }}
@@ -103,7 +122,7 @@ const TypingArea = ({ exampleValue, setTotalCount }: TypingAreaProp) => {
 
             if (
               key === "Enter" &&
-              inputString?.length === exampleValue.length
+              inputString?.length === exampleList[currentIndex]?.length
             ) {
               handleComplete()
               return
@@ -118,7 +137,7 @@ const TypingArea = ({ exampleValue, setTotalCount }: TypingAreaProp) => {
               <span key={string + index}>{string}</span>
             ))}
           </p>
-          <p className={styles.exampleText}>{exampleValue}</p>
+          <p className={styles.exampleText}>{exampleList[currentIndex]}</p>
         </div>
       </div>
       <KeyboardReact

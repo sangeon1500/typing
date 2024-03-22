@@ -7,8 +7,9 @@ import { useState, useEffect } from "react"
 import TypingArea from "../components/TypingArea"
 
 const Home: NextPage = () => {
-  const [exampleValue, setExampleValue] = useState<string>("안녕하세요")
+  const [exampleValue, setExampleValue] = useState<string>("")
   const [totalCount, setTotalCount] = useState<number>(0)
+
   useEffect(() => {
     // 로컬스토리지
     if (totalCount === 0) {

@@ -1,11 +1,12 @@
 import styles from "../styles/components/TypingArea.module.scss"
+import { typingMap } from "../utils/typing"
+
 interface TypingExampleProp {
   changeState: (newTarget: string) => void
   totalCount: number
 }
 
 const TypingExample = ({ changeState, totalCount }: TypingExampleProp) => {
-  const exampleList = ["안녕하세요", "펴나니", "가좌동", "실버타운", "요양원"]
   return (
     <div>
       <div>타이핑연습</div>
@@ -15,7 +16,7 @@ const TypingExample = ({ changeState, totalCount }: TypingExampleProp) => {
       </div>
       <div className={styles.box}>
         <ul className={styles.buttonUl}>
-          {exampleList.map((example) => (
+          {Object.keys(typingMap).map((example) => (
             <li key={example} style={{ listStyle: "none" }}>
               <button
                 className={styles.typeButton}
