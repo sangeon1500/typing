@@ -1,6 +1,13 @@
 import * as Hangul from "hangul-js"
 import styles from "../styles/components/TypingArea.module.scss"
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react"
+import {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react"
 import KeyboardReact, {
   KeyboardElement,
   KeyboardReactInterface,
@@ -16,8 +23,9 @@ interface TypingAreaProp {
 const TypingArea = ({ exampleValue, setTotalCount }: TypingAreaProp) => {
   const keyboardRef = useRef<KeyboardReactInterface | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
-  const isSubmitRef = useRef<boolean>(false)
   const buttonRef = useRef<KeyboardElement | null>(null)
+  const exampleListRef = useRef<string[] | null>(null)
+  const [currentExampleString, setCurrentExampleString] = useState<string>("")
   const [currentIndex, setCurrentIndex] = useState<number>(0)
   const [layoutName, setLayoutName] = useState("default")
   const [text, setText] = useState<string>("")
@@ -42,95 +50,108 @@ const TypingArea = ({ exampleValue, setTotalCount }: TypingAreaProp) => {
     }
   }
 
-  const handleComplete = () => {
-    setSubmitCount(submitCount + 1)
+  const setNextString = () => {
     setCurrentIndex(currentIndex + 1)
-    setTotalCount((totalCount: number) => totalCount + 1)
-    setInputString("")
-    isSubmitRef.current = true
   }
 
   useEffect(() => {
     inputRef.current?.focus()
-  }, [])
-
-  useEffect(() => {
-    setInputString("")
-    setSubmitCount(0)
-    isSubmitRef.current = false
-    setExampleList(typingMap[exampleValue] ?? [])
   }, [exampleValue])
 
   useEffect(() => {
-    // const exampleDiassemble = Hangul.disassemble(exampleValue)
-    // const inputeDiassemble = Hangul.disassemble(inputString)
-    // const nextChar = exampleDiassemble[inputeDiassemble?.length || 0]
-    // if (buttonRef.current) {
-    //   buttonRef.current.style.backgroundColor = "#FFFFFF"
-    //   buttonRef.current.style.color = "#333333"
-    // }
-    // buttonRef.current =
-    //   keyboardRef.current?.buttonElements[nextChar]?.[0] || null
-    // if (buttonRef.current) {
-    //   buttonRef.current.style.backgroundColor = "#ff845c"
-    //   buttonRef.current.style.color = "#E64234"
-    // }
-  }, [inputString])
+    if (!exampleList?.length) return
+
+    setCurrentExampleString(exampleList[currentIndex])
+  }, [currentIndex, exampleList])
+
+  useEffect(() => {
+    setInputString("")
+    exampleListRef.current = Hangul.disassemble(currentExampleString ?? "")
+  }, [currentExampleString])
+
+  useEffect(() => {
+    setExampleList(typingMap[exampleValue] ?? [])
+    setSubmitCount(0)
+  }, [exampleValue])
+
+  useEffect(() => {
+    const inputeDiassemble = Hangul.disassemble(inputString)
+    const nextChar = (exampleListRef.current ?? [])[
+      inputeDiassemble?.length || 0
+    ]
+
+    if (buttonRef.current) {
+      buttonRef.current.style.backgroundColor = "#FFFFFF"
+      buttonRef.current.style.color = "#333333"
+    }
+
+    buttonRef.current =
+      keyboardRef.current?.buttonElements[nextChar]?.[0] || null
+
+    if (buttonRef.current) {
+      buttonRef.current.style.backgroundColor = "#ff845c"
+      buttonRef.current.style.color = "#E64234"
+    }
+  }, [inputString, currentIndex])
 
   return (
     <div className={styles.wrap}>
-      <ul
-        className={styles.exampleWrap}
-        style={{ transform: `translateY(-${currentIndex * 42}px)` }}
-      >
-        {exampleList?.map((examString, index) => (
-          <li
-            key={examString + index}
-            className={
-              currentIndex === index
-                ? styles.exampleItemActive
-                : styles.exampleItem
-            }
-          >
-            {examString}
-          </li>
-        ))}
-      </ul>
+      <div className={styles.exampleWrap}>
+        <ul
+          className={styles.exampleBox}
+          style={{ transform: `translateY(-${currentIndex * 42}px)` }}
+        >
+          {exampleList?.map((examString, index) => (
+            <li
+              key={examString + index}
+              className={
+                currentIndex === index
+                  ? styles.exampleItemActive
+                  : styles.exampleItem
+              }
+            >
+              {examString}
+            </li>
+          ))}
+        </ul>
+      </div>
       <p className={styles.exampleValue}>{exampleValue}</p>
       <div className={styles.box}>
-        <input
-          className={styles.input}
-          value={inputString}
-          ref={inputRef}
-          onChange={(e) => {
-            if (isSubmitRef.current) return
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
 
-            const newValue = e.target.value
-            setInputString(newValue)
-
-            if (newValue?.length > exampleList[currentIndex]?.length) {
-              handleComplete()
+            if (inputString?.length === exampleList[currentIndex]?.length) {
+              setNextString()
             }
           }}
-          onKeyDown={({ key }) => {
-            if (key === "Shift") {
-              setLayoutName((prev) =>
-                prev === "default" ? "shift" : "default",
-              )
-              return
-            }
+        >
+          <input
+            className={styles.input}
+            value={inputString}
+            ref={inputRef}
+            onChange={(e) => {
+              const newValue = e.target.value
 
-            if (
-              key === "Enter" &&
-              inputString?.length === exampleList[currentIndex]?.length
-            ) {
-              handleComplete()
-              return
-            }
+              if (newValue?.length > exampleList[currentIndex]?.length) {
+                setNextString()
+                return
+              }
 
-            keyboardRef.current?.setInput(key)
-          }}
-        />
+              setInputString(newValue)
+            }}
+            onKeyDown={({ key }) => {
+              if (key === "Shift") {
+                setLayoutName((prev) =>
+                  prev === "default" ? "shift" : "default",
+                )
+                return
+              }
+
+              keyboardRef.current?.setInput(key)
+            }}
+          />
+        </form>
         <div style={{ position: "relative", margin: "10px 0" }}>
           <p className={styles.typingText}>
             {inputString.split("").map((string, index) => (
