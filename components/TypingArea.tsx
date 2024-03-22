@@ -1,13 +1,6 @@
 import * as Hangul from "hangul-js"
 import styles from "../styles/components/TypingArea.module.scss"
-import {
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react"
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react"
 import KeyboardReact, {
   KeyboardElement,
   KeyboardReactInterface,
@@ -18,9 +11,14 @@ import { typingMap } from "../utils/typing"
 interface TypingAreaProp {
   exampleValue: string
   setTotalCount: Dispatch<SetStateAction<number>>
+  setShowModal: (modal: boolean) => void
 }
 
-const TypingArea = ({ exampleValue, setTotalCount }: TypingAreaProp) => {
+const TypingArea = ({
+  exampleValue,
+  setTotalCount,
+  setShowModal,
+}: TypingAreaProp) => {
   const keyboardRef = useRef<KeyboardReactInterface | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
   const buttonRef = useRef<KeyboardElement | null>(null)
@@ -31,6 +29,8 @@ const TypingArea = ({ exampleValue, setTotalCount }: TypingAreaProp) => {
   const [text, setText] = useState<string>("")
   const [exampleList, setExampleList] = useState<string[]>([])
   const [inputString, setInputString] = useState<string>("")
+  const [wrongNumber, setWrongNumer] = useState<number>(0)
+  const [inputStringList, setInputStringList] = useState<string[]>([])
   const [submitCount, setSubmitCount] = useState<number>(0)
 
   const onKeyPress = (key: string) => {
@@ -51,6 +51,10 @@ const TypingArea = ({ exampleValue, setTotalCount }: TypingAreaProp) => {
   }
 
   const setNextString = () => {
+    setInputStringList((prev) => {
+      return [...prev, inputString]
+    })
+
     setCurrentIndex(currentIndex + 1)
   }
 
@@ -60,6 +64,39 @@ const TypingArea = ({ exampleValue, setTotalCount }: TypingAreaProp) => {
 
   useEffect(() => {
     if (!exampleList?.length) return
+
+    console.log(currentIndex);
+    
+
+    if (currentIndex === exampleList.length - 1) {
+      console.log(exampleList)
+
+      console.log(inputStringList)
+
+      setShowModal(true)
+      setInputString("")
+
+      let tempWrongNumber = 0
+
+      exampleList.forEach((exampleText, index) => {
+        const exampleCharList = exampleText?.split("")
+        const inputCharList = inputStringList[index]?.split("")
+
+        console.log(inputStringList[index])
+
+        const checkList = exampleCharList.filter(
+          (char, charIndex) => char === inputCharList[charIndex],
+        )
+
+        tempWrongNumber += checkList.length
+      })
+
+      setWrongNumer(tempWrongNumber)
+
+      console.log(tempWrongNumber)
+
+      return
+    }
 
     setCurrentExampleString(exampleList[currentIndex])
   }, [currentIndex, exampleList])
@@ -115,7 +152,9 @@ const TypingArea = ({ exampleValue, setTotalCount }: TypingAreaProp) => {
           ))}
         </ul>
       </div>
-      <p className={styles.exampleValue}>{exampleValue}</p>
+      <p className={styles.exampleValue}>
+        {exampleValue || "좌측의 타이핑 연습 주제를 선택해주세요."}
+      </p>
       <div className={styles.box}>
         <form
           onSubmit={(e) => {
@@ -130,7 +169,10 @@ const TypingArea = ({ exampleValue, setTotalCount }: TypingAreaProp) => {
             className={styles.input}
             value={inputString}
             ref={inputRef}
+            disabled={!exampleValue}
             onChange={(e) => {
+              if (!exampleValue) return
+
               const newValue = e.target.value
 
               if (newValue?.length > exampleList[currentIndex]?.length) {

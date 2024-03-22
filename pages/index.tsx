@@ -5,10 +5,12 @@ import styles from "../styles/Home.module.css"
 import TypingExample from "../components/TypingExample"
 import { useState, useEffect } from "react"
 import TypingArea from "../components/TypingArea"
+import TypingModal from "../components/TypingModal"
 
 const Home: NextPage = () => {
   const [exampleValue, setExampleValue] = useState<string>("")
   const [totalCount, setTotalCount] = useState<number>(0)
+  const [showModal, setShowModal] = useState<boolean>(false)
 
   useEffect(() => {
     // 로컬스토리지
@@ -33,12 +35,14 @@ const Home: NextPage = () => {
       <main className={styles.main}>
         <div className={styles.typingBox}>
           <TypingExample
+            exampleValue={exampleValue}
             changeState={setExampleValue}
             totalCount={totalCount}
           />
           <TypingArea
             exampleValue={exampleValue}
             setTotalCount={setTotalCount}
+            setShowModal={setShowModal}
           />
         </div>
       </main>
@@ -55,6 +59,7 @@ const Home: NextPage = () => {
           </span>
         </a>
       </footer>
+      {showModal ? <TypingModal /> : null}
     </div>
   )
 }

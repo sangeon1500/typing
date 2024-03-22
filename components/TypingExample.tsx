@@ -2,11 +2,16 @@ import styles from "../styles/components/TypingArea.module.scss"
 import { typingMap } from "../utils/typing"
 
 interface TypingExampleProp {
+  exampleValue: string
   changeState: (newTarget: string) => void
   totalCount: number
 }
 
-const TypingExample = ({ changeState, totalCount }: TypingExampleProp) => {
+const TypingExample = ({
+  exampleValue,
+  changeState,
+  totalCount,
+}: TypingExampleProp) => {
   return (
     <div>
       <div>타이핑연습</div>
@@ -19,7 +24,11 @@ const TypingExample = ({ changeState, totalCount }: TypingExampleProp) => {
           {Object.keys(typingMap).map((example) => (
             <li key={example} style={{ listStyle: "none" }}>
               <button
-                className={styles.typeButton}
+                className={
+                  exampleValue === example
+                    ? styles.typeButtonActive
+                    : styles.typeButton
+                }
                 key={example}
                 onClick={() => {
                   changeState(example)

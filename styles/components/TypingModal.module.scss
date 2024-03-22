@@ -1,0 +1,23 @@
+.background {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-color: black;
+  opacity: 0.75;
+  z-index: 200;
+}
+
+.container {
+  width: 100%;
+  max-width: 500px;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 10px 10px 10px 10px;
+  z-index: 201;
+  height: auto;
+}
